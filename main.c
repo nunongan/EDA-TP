@@ -1,4 +1,4 @@
-//==================================================== INCLUDES ===============================================================
+#pragma region includes
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,40 +7,138 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-// ============================================================================================================================
+#pragma endregion
 
-typedef struct operation{
+#pragma region structs
 
+typedef struct _production
+{
     int machineID;
-    int operationID;
     int time;
+    struct _production *next, *prev;
 
-    struct operation *next, *prev;
-    struct job *first, *last;
+} Production;
+
+typedef struct _operation
+{
+
+    int operationID;
+    struct _operation *next;
+    struct _production *first, *last;
 
 } Operation;
 
-typedef struct job{
+#pragma endregion
 
-    int jobID;
-    int operationID;
+Operation *head_insert(Operation *list, int operationID)
+{
+    Operation *new = (Operation *)malloc(sizeof(Operation));
 
-    struct job *next, *prev;
-    struct operation *first, *last;
+    new->operationID = operationID;
+    new->first = new->last = NULL;
+    new->next = list;
 
-} Job;
+    return new;
+}
 
+Production *tail_insert(Production *list, int machineID, int time)
+{
 
-Operation * createOpList(int machineID, int operationID, int time){
+    Production *cell = (Production *)malloc(sizeof(Production));
 
-    Operation * list = (Operation *)malloc(sizeof(Operation));
-    list->machineID = machineID;
-    list->operationID = operationID;
-    list->time = time;
-    list->next = NULL;
-    list->prev = NULL;
-    list->first = list;
-    list->last = list;
+    cell->machineID = machineID;
+    cell->time = time;
+    cell->next = NULL;
+    cell->prev = list;
+    if (cell->prev)
+    {
+        cell->prev->next = cell;
+    }
+
+    return cell;
+}
+
+Operation *insertion(Operation *list, int operationID, int machineID, int time)
+{
+
+    Operation *aux = list;
+
+    while (aux)
+    {
+
+        if (aux->operationID == operationID)
+        {
+            break;
+        }
+
+        aux = aux->next;
+    }
+
+    // if(!aux) return list;
+
+    if (!aux->last) // nobody in the waiting line
+    {
+        aux->first = aux->last = tail_insert(aux->last, machineID, time);
+    }
+    else
+    {
+        aux->last = tail_insert(aux->last, machineID, time);
+    }
+    return list;
+}
+
+void saveData(Operation *list)
+{
+
+    FILE *file;
+
+    file = fopen("./data/productions_tmp.txt", "w+");
+
+    for (; list; list = list->next)
+    {
+
+        Production *ptr = list->first;
+
+        for (; ptr;)
+        {
+
+            fprintf(file, "%d,%d,%d\n", list->operationID, ptr->machineID, ptr->time);
+            ptr = ptr->next;
+        }
+    }
+
+    fclose(file);
+}
+
+Operation *readData(Operation *list)
+{
+    FILE *file;
+
+    file = fopen("./data/productions.txt", "r");
+
+    while (!feof(file))
+    {
+
+        char line[1000];
+        int operationID, machineID, time;
+        fgets(line, 1000, file);
+        printf("%s",line);
+        sscanf(line, "%d,%d,%d", &operationID, &machineID, &time);
+        list = head_insert(list, operationID);
+        list = insertion(list, operationID, machineID, time);
+    }
 
     return list;
+
+    fclose(file);
+}
+
+int main()
+{
+
+    Operation *test = NULL;
+
+    test = readData(test);
+    saveData(test);
+    return 0;
 }
