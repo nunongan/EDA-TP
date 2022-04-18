@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <string.h>
 
@@ -67,7 +68,9 @@ Production *tail_insert(Production *list, int machineID, int time)
 #pragma region insertion
 Operation *insertion(Operation *list, int operationID, int machineID, int time)
 {
-
+    if (list)
+    {
+    }
     Operation *point = list;
 
     while (point)
@@ -193,7 +196,7 @@ Operation *minimumTime(Operation *list)
     {
         if (min[i] != 9999)
         {
-            printf("%d -> %d \n", i, min[i]);
+            printf("Operation %d -> %d seconds \n", i, min[i]);
         }
     }
     return list;
@@ -225,7 +228,7 @@ Operation *maximumTime(Operation *list)
     {
         if (max[i] != 0)
         {
-            printf("%d -> %d \n", i, max[i]);
+            printf("Operation %d -> %d seconds \n", i, max[i]);
         }
     }
     return list;
@@ -258,7 +261,7 @@ Operation *avg(Operation *list)
         if (counter[i] != 0)
         {
             float average = sum[i] / (float)counter[i];
-            printf("%d -> %.2f \n", i, average);
+            printf("Operation %d -> %.2f seconds \n", i, average);
         }
     }
     return list;
@@ -281,17 +284,162 @@ void showList(Operation *list)
     }
 }
 
-
 #pragma endregion
+int menu();
 
 int main()
 {
+    // printf("hello");
+    menu();
+}
+#pragma region Menu
 
-    Operation *test = NULL;
+int menu()
+{
 
-    test = loadData(test);
-    avg(test);
-    showList(test);
+    Operation *list = NULL;
+    Production *list2 = NULL;
+
+    list = loadData(list);
+    bool off = false;
+    do
+    {
+        int option = -1;
+
+        system("cls");
+
+        printf("========= MENU =========\n");
+        printf("Please, choose a function.\n");
+        printf("=========================\n");
+        printf("\n");
+        printf("1. Insert Operation.\n");
+        printf("2. Change Operation.\n");
+        printf("3. Minimum time to complete a job - List respective operations\n");
+        printf("4. Maximum time to complete a job - List respective operations\n");
+        printf("5. Average time to complete an operation - Listing every possibility.\n");
+        printf("6. Exit\n\n");
+        printf("Option: ");
+        scanf("%d", &option);
+        if (option > 0 || option < 7)
+        {
+            switch (option)
+            {
+            case 1:
+
+                system("cls");
+
+                int opID;
+                int mID;
+                int time;
+
+                printf("Operation ID: ");
+                scanf("%d", &opID);
+
+                printf("\nMachine ID: ");
+                scanf("%d", &mID);
+                printf("\nTime: ");
+                scanf("%d", &time);
+                list = head_insert(list, opID);
+                list = insertion(list, opID, mID, time);
+
+                showList(list);
+                saveData(list);
+
+                printf("Operation Inserted.\n\n");
+
+                system("pause");
+
+                // menu()
+
+                break;
+
+            case 2:
+
+                system("cls");
+
+                int option;
+                int operationFlag = 0;
+                int machineFlag = 0;
+
+                printf("Here is the current data: \n\n");
+
+                showList(list);
+
+                printf("\n Operation ID: ");
+                scanf("%d", &opID);
+
+                printf("\n Machine ID: ");
+                scanf("%d", &mID);
+
+                printf("\n Time: ");
+                scanf("%d", &time);
+
+                changeOperation(list, opID, mID, time);
+
+                system("cls");
+                showList(list);
+                printf("Operation Changed.\n\n");
+
+                system("pause");
+                saveData(list);
+
+                // menu();
+
+                break;
+
+            case 3:
+
+                system("cls");
+
+                printf("Here is the minimum time to complete a job with the respective operations:\n\n");
+
+                minimumTime(list);
+
+                printf("\n\n");
+                system("pause");
+                // menu();
+
+                break;
+
+            case 4:
+
+                system("cls");
+
+                printf("Here is the maximum time to complete a job with the respective operations:\n\n");
+
+                maximumTime(list);
+
+                printf("\n\n");
+                system("pause");
+                // menu();
+
+                break;
+
+            case 5:
+
+                system("cls");
+                printf("Here is the average time to complete an operation, with every possibility listed: \n\n");
+
+                avg(list);
+
+                printf("\n\n");
+                system("pause");
+                // menu();
+
+                break;
+
+            case 6:
+
+                printf("Thank you for using my program!\n\n");
+                system("pause");
+                exit(0);
+
+                break;
+            }
+        }
+    } while (off == false);
 
     return 0;
 }
+
+#pragma endregion
