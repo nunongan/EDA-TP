@@ -1,3 +1,13 @@
+/*
+
+ -- Instituto Politécnico do Cávado e do Ave --
+
+ Autor:        Nuno Santos - 21132
+ Curso:        Engenharia de Sistemas Informáticos
+ Repo:         https://github.com/nunongan/EDA-TP
+
+*/
+
 #pragma region includes
 
 #include <stdlib.h>
