@@ -20,33 +20,38 @@
 
 #pragma region structs
 
-typedef struct _production
+
+
+typedef struct _machine
 {
     int machineID;
-    int time;
-    struct _production *next, *prev;
-
-} Production;
-
-typedef struct _operation
-{
-
     int operationID;
-    struct _operation *next, *prev;
-    struct _production *first, *last;
+    int time;
+    struct _machine *next, *prev;
 
-} Operation;
+} Machine;
+
+typedef struct _job{
+
+    int jobID;
+
+    struct _job *next, *prev;
+    struct Machine *first, *last;
+
+    
+} Job;
 
 #pragma endregion
 
 #pragma region headInsert
 
-Operation *head_insert(Operation *list, int operationID)
+Machine *head_insert(Machine *list, int operationID, int machineID, int time)
 {
-    Operation *new = (Operation *)malloc(sizeof(Operation));
+    Machine *new = (Machine *)malloc(sizeof(Machine));
 
+    new->machineID = machineID;
     new->operationID = operationID;
-    new->first = new->last = NULL;
+    new->time = time;
     new->next = list;
 
     return new;
@@ -56,13 +61,12 @@ Operation *head_insert(Operation *list, int operationID)
 
 #pragma region tailInsert
 
-Production *tail_insert(Production *list, int machineID, int time)
+Job *tail_insert(Job *list, int jobID)
 {
 
-    Production *new = (Production *)malloc(sizeof(Production));
+    Job *new = (Job *)malloc(sizeof(Job));
 
-    new->machineID = machineID;
-    new->time = time;
+    new->jobID = jobID;
     new->next = NULL;
     new->prev = list;
     if (new->prev)
@@ -76,17 +80,15 @@ Production *tail_insert(Production *list, int machineID, int time)
 #pragma endregion
 
 #pragma region insertion
-Operation *insertion(Operation *list, int operationID, int machineID, int time)
+Job *insertion(Job *list, int jobID, int operationID, int machineID, int time)
 {
-    if (list)
-    {
-    }
-    Operation *point = list;
+
+    Job *point = list;
 
     while (point)
     {
 
-        if (point->operationID == operationID)
+        if (point->jobID == jobID)
         {
             break;
         }
@@ -96,11 +98,11 @@ Operation *insertion(Operation *list, int operationID, int machineID, int time)
 
     if (!point->last)
     {
-        point->first = point->last = tail_insert(point->last, machineID, time);
+        point->first = point->last = head_insert(point->last, operationID, machineID, time);
     }
     else
     {
-        point->last = tail_insert(point->last, machineID, time);
+        point->last = head_insert(point->last, operationID, machineID, time);
     }
     return list;
 }
@@ -109,30 +111,30 @@ Operation *insertion(Operation *list, int operationID, int machineID, int time)
 
 #pragma region fileManipulation
 
-void saveData(Operation *list)
-{
+// void saveData(Operation *list)
+// {
 
-    FILE *file;
+//     FILE *file;
 
-    file = fopen("./data/productionsWrite.txt", "w+");
+//     file = fopen("./data/productionsWrite.txt", "w+");
 
-    for (; list; list = list->next)
-    {
+//     for (; list; list = list->next)
+//     {
 
-        Production *point = list->first;
+//         Production *point = list->first;
 
-        for (; point;)
-        {
+//         for (; point;)
+//         {
 
-            fprintf(file, "%d,%d,%d\n", list->operationID, point->machineID, point->time);
-            point = point->next;
-        }
-    }
+//             fprintf(file, "%d,%d,%d\n", list->operationID, point->machineID, point->time);
+//             point = point->next;
+//         }
+//     }
 
-    fclose(file);
-}
+//     fclose(file);
+// }
 
-Operation *loadData(Operation *list)
+Job *loadData(Job *list)
 {
     FILE *file;
 
@@ -142,314 +144,321 @@ Operation *loadData(Operation *list)
     {
 
         char line[1000];
-        int operationID, machineID, time;
+        int jobID, operationID, machineID, time;
         fgets(line, 1000, file);
-        sscanf(line, "%d,%d,%d", &operationID, &machineID, &time);
-        list = head_insert(list, operationID);
-        list = insertion(list, operationID, machineID, time);
+        sscanf(line, "%d,%d,%d,%d",&jobID, &operationID, &machineID, &time);
+        list = tail_insert(list, jobID);
+        list = insertion(list, jobID, operationID, machineID, time);
     }
-
-    return list;
 
     fclose(file);
+
+    return list;
+
+    
 }
 
 #pragma endregion
 
-#pragma region Functions
+ #pragma region Functions
 
-Operation *changeOperation(Operation *list, int operationID, int machineID, int time)
+// Operation *changeOperation(Operation *list, int operationID, int machineID, int time)
+// {
+//     for (; list; list = list->next)
+//     {
+//         if (list->operationID == operationID)
+//         {
+//             Production *point = list->first;
+
+//             for (; point;)
+//             {
+//                 if (point->machineID == machineID)
+//                 {
+
+//                     point->time = time;
+//                 }
+//                 point = point->next;
+//             }
+//         }
+//     }
+//     return list;
+// }
+
+// Operation *minimumTime(Operation *list)
+// {
+//     int min[50];
+//     for (int i = 0; i < 50; i++)
+//     {
+
+//         min[i] = 9999;
+//     }
+//     for (; list; list = list->next)
+//     {
+//         Production *point = list->first;
+//         for (; point;)
+//         {
+//             if (min[list->operationID] > point->time)
+//             {
+
+//                 min[list->operationID] = point->time;
+//             }
+
+//             point = point->next;
+//         }
+//     }
+//     for (int i = 0; i < 50; i++)
+//     {
+//         if (min[i] != 9999)
+//         {
+//             printf("Operation %d -> %d seconds \n", i, min[i]);
+//         }
+//     }
+//     return list;
+// }
+
+// Operation *maximumTime(Operation *list)
+// {
+//     int max[50];
+//     for (int i = 0; i < 50; i++)
+//     {
+
+//         max[i] = 0;
+//     }
+//     for (; list; list = list->next)
+//     {
+//         Production *point = list->first;
+//         for (; point;)
+//         {
+//             if (max[list->operationID] < point->time)
+//             {
+
+//                 max[list->operationID] = point->time;
+//             }
+
+//             point = point->next;
+//         }
+//     }
+//     for (int i = 0; i < 50; i++)
+//     {
+//         if (max[i] != 0)
+//         {
+//             printf("Operation %d -> %d seconds \n", i, max[i]);
+//         }
+//     }
+//     return list;
+// }
+
+// Operation *avg(Operation *list)
+// {
+//     int sum[50], counter[50];
+
+//     for (int i = 0; i < 50; i++)
+//     {
+//         counter[i] = 0;
+//         sum[i] = 0;
+//     }
+
+//     for (; list; list = list->next)
+//     {
+//         Production *point = list->first;
+//         for (; point;)
+//         {
+
+//             sum[list->operationID] += point->time;
+//             counter[list->operationID]++;
+
+//             point = point->next;
+//         }
+//     }
+//     for (int i = 0; i < 50; i++)
+//     {
+//         if (counter[i] != 0)
+//         {
+//             float average = sum[i] / (float)counter[i];
+//             printf("Operation %d -> %.2f seconds \n", i, average);
+//         }
+//     }
+//     return list;
+// }
+
+void showList(Job *list)
 {
+
     for (; list; list = list->next)
     {
-        if (list->operationID == operationID)
-        {
-            Production *point = list->first;
 
-            for (; point;)
-            {
-                if (point->machineID == machineID)
-                {
+        Machine *point = list->first;
 
-                    point->time = time;
-                }
-                point = point->next;
-            }
-        }
-    }
-    return list;
-}
-
-Operation *minimumTime(Operation *list)
-{
-    int min[50];
-    for (int i = 0; i < 50; i++)
-    {
-
-        min[i] = 9999;
-    }
-    for (; list; list = list->next)
-    {
-        Production *point = list->first;
         for (; point;)
         {
-            if (min[list->operationID] > point->time)
-            {
 
-                min[list->operationID] = point->time;
-            }
-
+            printf("%d | %d | %d | %d\n", list->jobID, point->operationID, point->machineID, point->time);
             point = point->next;
         }
     }
-    for (int i = 0; i < 50; i++)
-    {
-        if (min[i] != 9999)
-        {
-            printf("Operation %d -> %d seconds \n", i, min[i]);
-        }
-    }
-    return list;
 }
 
-Operation *maximumTime(Operation *list)
-{
-    int max[50];
-    for (int i = 0; i < 50; i++)
-    {
-
-        max[i] = 0;
-    }
-    for (; list; list = list->next)
-    {
-        Production *point = list->first;
-        for (; point;)
-        {
-            if (max[list->operationID] < point->time)
-            {
-
-                max[list->operationID] = point->time;
-            }
-
-            point = point->next;
-        }
-    }
-    for (int i = 0; i < 50; i++)
-    {
-        if (max[i] != 0)
-        {
-            printf("Operation %d -> %d seconds \n", i, max[i]);
-        }
-    }
-    return list;
-}
-
-Operation *avg(Operation *list)
-{
-    int sum[50], counter[50];
-
-    for (int i = 0; i < 50; i++)
-    {
-        counter[i] = 0;
-        sum[i] = 0;
-    }
-
-    for (; list; list = list->next)
-    {
-        Production *point = list->first;
-        for (; point;)
-        {
-
-            sum[list->operationID] += point->time;
-            counter[list->operationID]++;
-
-            point = point->next;
-        }
-    }
-    for (int i = 0; i < 50; i++)
-    {
-        if (counter[i] != 0)
-        {
-            float average = sum[i] / (float)counter[i];
-            printf("Operation %d -> %.2f seconds \n", i, average);
-        }
-    }
-    return list;
-}
-
-void showList(Operation *list)
-{
-
-    for (; list; list = list->next)
-    {
-
-        Production *point = list->first;
-
-        for (; point;)
-        {
-
-            printf("%d | %d | %d\n", list->operationID, point->machineID, point->time);
-            point = point->next;
-        }
-    }
-}
-
-#pragma endregion
-int menu();
+// #pragma endregion
+// int menu();
 
 int main()
 {
     // printf("hello");
-    menu();
+    //menu();
+
+
+    Job *list = NULL;
+    list = loadData(list);
+    showList(list);
 }
 #pragma region Menu
 
-int menu()
-{
+// int menu()
+// {
 
-    Operation *list = NULL;
-    Production *list2 = NULL;
+//     Operation *list = NULL;
+//     Production *list2 = NULL;
 
-    list = loadData(list);
-    bool off = false;
-    do
-    {
-        int option = -1;
+//     list = loadData(list);
+//     bool off = false;
+//     do
+//     {
+//         int option = -1;
 
-        system("cls");
+//         system("cls");
 
-        printf("========= MENU =========\n");
-        printf("Please, choose a function.\n");
-        printf("=========================\n");
-        printf("\n");
-        printf("1. Insert Operation.\n");
-        printf("2. Change Operation.\n");
-        printf("3. Minimum time to complete a job - List respective operations\n");
-        printf("4. Maximum time to complete a job - List respective operations\n");
-        printf("5. Average time to complete an operation - Listing every possibility.\n");
-        printf("6. Exit\n\n");
-        printf("Option: ");
-        scanf("%d", &option);
-        if (option > 0 || option < 7)
-        {
-            switch (option)
-            {
-            case 1:
+//         printf("========= MENU =========\n");
+//         printf("Please, choose a function.\n");
+//         printf("=========================\n");
+//         printf("\n");
+//         printf("1. Insert Operation.\n");
+//         printf("2. Change Operation.\n");
+//         printf("3. Minimum time to complete a job - List respective operations\n");
+//         printf("4. Maximum time to complete a job - List respective operations\n");
+//         printf("5. Average time to complete an operation - Listing every possibility.\n");
+//         printf("6. Exit\n\n");
+//         printf("Option: ");
+//         scanf("%d", &option);
+//         if (option > 0 || option < 7)
+//         {
+//             switch (option)
+//             {
+//             case 1:
 
-                system("cls");
+//                 system("cls");
 
-                int opID;
-                int mID;
-                int time;
+//                 int opID;
+//                 int mID;
+//                 int time;
 
-                printf("Operation ID: ");
-                scanf("%d", &opID);
+//                 printf("Operation ID: ");
+//                 scanf("%d", &opID);
 
-                printf("\nMachine ID: ");
-                scanf("%d", &mID);
-                printf("\nTime: ");
-                scanf("%d", &time);
-                list = head_insert(list, opID);
-                list = insertion(list, opID, mID, time);
+//                 printf("\nMachine ID: ");
+//                 scanf("%d", &mID);
+//                 printf("\nTime: ");
+//                 scanf("%d", &time);
+//                 list = head_insert(list, opID);
+//                 list = insertion(list, opID, mID, time);
 
-                showList(list);
-                saveData(list);
+//                 showList(list);
+//                 saveData(list);
 
-                printf("Operation Inserted.\n\n");
+//                 printf("Operation Inserted.\n\n");
 
-                system("pause");
+//                 system("pause");
 
-                // menu()
+//                 // menu()
 
-                break;
+//                 break;
 
-            case 2:
+//             case 2:
 
-                system("cls");
+//                 system("cls");
 
-                int option;
-                int operationFlag = 0;
-                int machineFlag = 0;
+//                 int option;
+//                 int operationFlag = 0;
+//                 int machineFlag = 0;
 
-                printf("Here is the current data: \n\n");
+//                 printf("Here is the current data: \n\n");
 
-                showList(list);
+//                 showList(list);
 
-                printf("\n Operation ID: ");
-                scanf("%d", &opID);
+//                 printf("\n Operation ID: ");
+//                 scanf("%d", &opID);
 
-                printf("\n Machine ID: ");
-                scanf("%d", &mID);
+//                 printf("\n Machine ID: ");
+//                 scanf("%d", &mID);
 
-                printf("\n Time: ");
-                scanf("%d", &time);
+//                 printf("\n Time: ");
+//                 scanf("%d", &time);
 
-                changeOperation(list, opID, mID, time);
+//                 changeOperation(list, opID, mID, time);
 
-                system("cls");
-                showList(list);
-                printf("Operation Changed.\n\n");
+//                 system("cls");
+//                 showList(list);
+//                 printf("Operation Changed.\n\n");
 
-                system("pause");
-                saveData(list);
+//                 system("pause");
+//                 saveData(list);
 
-                // menu();
+//                 // menu();
 
-                break;
+//                 break;
 
-            case 3:
+//             case 3:
 
-                system("cls");
+//                 system("cls");
 
-                printf("Here is the minimum time to complete a job with the respective operations:\n\n");
+//                 printf("Here is the minimum time to complete a job with the respective operations:\n\n");
 
-                minimumTime(list);
+//                 minimumTime(list);
 
-                printf("\n\n");
-                system("pause");
-                // menu();
+//                 printf("\n\n");
+//                 system("pause");
+//                 // menu();
 
-                break;
+//                 break;
 
-            case 4:
+//             case 4:
 
-                system("cls");
+//                 system("cls");
 
-                printf("Here is the maximum time to complete a job with the respective operations:\n\n");
+//                 printf("Here is the maximum time to complete a job with the respective operations:\n\n");
 
-                maximumTime(list);
+//                 maximumTime(list);
 
-                printf("\n\n");
-                system("pause");
-                // menu();
+//                 printf("\n\n");
+//                 system("pause");
+//                 // menu();
 
-                break;
+//                 break;
 
-            case 5:
+//             case 5:
 
-                system("cls");
-                printf("Here is the average time to complete an operation, with every possibility listed: \n\n");
+//                 system("cls");
+//                 printf("Here is the average time to complete an operation, with every possibility listed: \n\n");
 
-                avg(list);
+//                 avg(list);
 
-                printf("\n\n");
-                system("pause");
-                // menu();
+//                 printf("\n\n");
+//                 system("pause");
+//                 // menu();
 
-                break;
+//                 break;
 
-            case 6:
+//             case 6:
 
-                printf("Thank you for using my program!\n\n");
-                system("pause");
-                exit(0);
+//                 printf("Thank you for using my program!\n\n");
+//                 system("pause");
+//                 exit(0);
 
-                break;
-            }
-        }
-    } while (off == false);
+//                 break;
+//             }
+//         }
+//     } while (off == false);
 
-    return 0;
-}
+//     return 0;
+// }
 
-#pragma endregion
+// #pragma endregion
